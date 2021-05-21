@@ -17,7 +17,7 @@
 #define INFI 999999 
 
 // implement PSRS algorithm to sort the array
-void My_PSRS(int thread_num,int ele_num,int* array);
+int* My_PSRS(int thread_num,int ele_num,int* array);
 
 // implement merge sort on _array(_start,_end)
 void Merge_sort(int _start,int _end,int* _array);
@@ -28,8 +28,9 @@ void Merge(int _start,int _mid,int _end,int* _array);
 // @_thread_num: number of threads for parallelism
 // @_ele_num: number of elements to sort
 // @_array: array to store the elements(which is accessed by each thread)
-// the sorted array will still be placed in _array.
-void My_PSRS(int _thread_num,int _ele_num,int* _array){
+//          it will be freed at the end of this function
+// the sorted array will still be returned
+int* My_PSRS(int _thread_num,int _ele_num,int* _array){
 
     // ************************************************** //
     // STEP 1: uniform partition to each thread
@@ -197,7 +198,7 @@ void My_PSRS(int _thread_num,int _ele_num,int* _array){
         _array[i] = new_array[i];
     }
 
-    // free those malloc ptrs
+    // free those malloc ptrs and return the sorted result
     free(start_index);
     free(samples);
     for(int i = 0; i < _thread_num;++i){
@@ -206,8 +207,9 @@ void My_PSRS(int _thread_num,int _ele_num,int* _array){
     }
     free(partition_start);
     free(new_partition_start);
-    free(new_array);
+    free(_array);
     free(partition_size);
+    return new_array;
 }
 
 // implement ascending merge sort on _array(_start,_end)
@@ -315,13 +317,15 @@ int main(int argc, char* argv[]){
     printf("\n");
 
     // call PSRS function to sort
-    My_PSRS(thread_num,ele_num,array);
+    int* new_array = My_PSRS(thread_num,ele_num,array);
 
     // show the sorted array
     printf("sorted array is\n");
     for(int i = 0; i < ele_num;++i){
-        printf("%d ",array[i]);
+        printf("%d ",new_array[i]);
     }
     printf("\n");
-    free(array);
+
+    free(new_array);
+    return 0;
 }
